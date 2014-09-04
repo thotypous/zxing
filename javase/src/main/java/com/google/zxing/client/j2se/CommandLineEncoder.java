@@ -54,30 +54,29 @@ public final class CommandLineEncoder {
 
     for (String arg : args) {
       String[] argValue = arg.split("=");
-      switch (argValue[0]) {
-        case "--barcode_format":
-          barcodeFormat = BarcodeFormat.valueOf(argValue[1]);
-          break;
-        case "--image_format":
-          imageFormat = argValue[1];
-          break;
-        case "--output":
-          outFileString = argValue[1];
-          break;
-        case "--width":
-          width = Integer.parseInt(argValue[1]);
-          break;
-        case "--height":
-          height = Integer.parseInt(argValue[1]);
-          break;
-        default:
-          if (arg.startsWith("-")) {
-            System.err.println("Unknown command line option " + arg);
-            printUsage();
-            return;
-          }
-          contents = arg;
-          break;
+      if (argValue[0].equals("--barcode_format")) {
+        barcodeFormat = BarcodeFormat.valueOf(argValue[1]);
+
+      } else if (argValue[0].equals("--image_format")) {
+        imageFormat = argValue[1];
+
+      } else if (argValue[0].equals("--output")) {
+        outFileString = argValue[1];
+
+      } else if (argValue[0].equals("--width")) {
+        width = Integer.parseInt(argValue[1]);
+
+      } else if (argValue[0].equals("--height")) {
+        height = Integer.parseInt(argValue[1]);
+
+      } else {
+        if (arg.startsWith("-")) {
+          System.err.println("Unknown command line option " + arg);
+          printUsage();
+          return;
+        }
+        contents = arg;
+
       }
     }
 

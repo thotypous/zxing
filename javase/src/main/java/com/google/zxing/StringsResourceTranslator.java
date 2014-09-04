@@ -79,7 +79,7 @@ public final class StringsResourceTranslator {
       " limitations under the License.\n" +
       " -->\n";
 
-  private static final Map<String,String> LANGUAGE_CODE_MASSAGINGS = new HashMap<>(3);
+  private static final Map<String,String> LANGUAGE_CODE_MASSAGINGS = new HashMap<String,String>(3);
   static {
     LANGUAGE_CODE_MASSAGINGS.put("zh-rCN", "zh-cn");
     LANGUAGE_CODE_MASSAGINGS.put("zh-rTW", "zh-tw");
@@ -129,7 +129,8 @@ public final class StringsResourceTranslator {
     resultTempFile.deleteOnExit();
 
     boolean anyChange = false;
-    try (Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultTempFile), UTF8))) {
+    Writer out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(resultTempFile), UTF8));
+    try {
       out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
       out.write(APACHE_2_LICENSE);
       out.write("<resources>\n");
@@ -158,6 +159,9 @@ public final class StringsResourceTranslator {
 
       out.write("</resources>\n");
       out.flush();
+    }
+    finally {
+      out.close();
     }
 
     if (anyChange) {
@@ -210,22 +214,27 @@ public final class StringsResourceTranslator {
     URLConnection connection = translateURL.openConnection();
     connection.connect();
     StringBuilder translateResult = new StringBuilder(200);
-    try (Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), UTF8))) {
+    Reader in = new BufferedReader(new InputStreamReader(connection.getInputStream(), UTF8));
+    try {
       char[] buffer = new char[1024];
       int charsRead;
       while ((charsRead = in.read(buffer)) > 0) {
         translateResult.append(buffer, 0, charsRead);
       }
     }
+    finally {
+      in.close();
+    }
     return translateResult;
   }
 
   private static SortedMap<String,String> readLines(File file) throws IOException {
-    SortedMap<String,String> entries = new TreeMap<>();
+    SortedMap<String,String> entries = new TreeMap<String,String>();
     if (!file.exists()) {
       return entries;
     }
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), UTF8))) {
+    BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), UTF8));
+    try {
       CharSequence line;
       while ((line = reader.readLine()) != null) {
         Matcher m = ENTRY_PATTERN.matcher(line);
@@ -236,6 +245,9 @@ public final class StringsResourceTranslator {
         }
       }
       return entries;
+    }
+    finally {
+      reader.close();
     }
   }
 

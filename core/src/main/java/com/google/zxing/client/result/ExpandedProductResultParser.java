@@ -62,7 +62,7 @@ public final class ExpandedProductResultParser extends ResultParser {
     String price = null;
     String priceIncrement = null;
     String priceCurrency = null;
-    Map<String,String> uncommonAIs = new HashMap<>();
+    Map<String,String> uncommonAIs = new HashMap<String,String>();
 
     int i = 0;
 
@@ -77,81 +77,55 @@ public final class ExpandedProductResultParser extends ResultParser {
       String value = findValue(i, rawText);
       i += value.length();
 
-      switch (ai) {
-        case "00":
-          sscc = value;
-          break;
-        case "01":
-          productID = value;
-          break;
-        case "10":
-          lotNumber = value;
-          break;
-        case "11":
-          productionDate = value;
-          break;
-        case "13":
-          packagingDate = value;
-          break;
-        case "15":
-          bestBeforeDate = value;
-          break;
-        case "17":
-          expirationDate = value;
-          break;
-        case "3100":
-        case "3101":
-        case "3102":
-        case "3103":
-        case "3104":
-        case "3105":
-        case "3106":
-        case "3107":
-        case "3108":
-        case "3109":
-          weight = value;
-          weightType = ExpandedProductParsedResult.KILOGRAM;
-          weightIncrement = ai.substring(3);
-          break;
-        case "3200":
-        case "3201":
-        case "3202":
-        case "3203":
-        case "3204":
-        case "3205":
-        case "3206":
-        case "3207":
-        case "3208":
-        case "3209":
-          weight = value;
-          weightType = ExpandedProductParsedResult.POUND;
-          weightIncrement = ai.substring(3);
-          break;
-        case "3920":
-        case "3921":
-        case "3922":
-        case "3923":
-          price = value;
-          priceIncrement = ai.substring(3);
-          break;
-        case "3930":
-        case "3931":
-        case "3932":
-        case "3933":
-          if (value.length() < 4) {
-            // The value must have more of 3 symbols (3 for currency and
-            // 1 at least for the price)
-            // ExtendedProductParsedResult NOT created. Not match with RSS Expanded pattern
-            return null;
-          }
-          price = value.substring(3);
-          priceCurrency = value.substring(0, 3);
-          priceIncrement = ai.substring(3);
-          break;
-        default:
-          // No match with common AIs
-          uncommonAIs.put(ai, value);
-          break;
+      if (ai.equals("00")) {
+        sscc = value;
+
+      } else if (ai.equals("01")) {
+        productID = value;
+
+      } else if (ai.equals("10")) {
+        lotNumber = value;
+
+      } else if (ai.equals("11")) {
+        productionDate = value;
+
+      } else if (ai.equals("13")) {
+        packagingDate = value;
+
+      } else if (ai.equals("15")) {
+        bestBeforeDate = value;
+
+      } else if (ai.equals("17")) {
+        expirationDate = value;
+
+      } else if (ai.equals("3100") || ai.equals("3101") || ai.equals("3102") || ai.equals("3103") || ai.equals("3104") || ai.equals("3105") || ai.equals("3106") || ai.equals("3107") || ai.equals("3108") || ai.equals("3109")) {
+        weight = value;
+        weightType = ExpandedProductParsedResult.KILOGRAM;
+        weightIncrement = ai.substring(3);
+
+      } else if (ai.equals("3200") || ai.equals("3201") || ai.equals("3202") || ai.equals("3203") || ai.equals("3204") || ai.equals("3205") || ai.equals("3206") || ai.equals("3207") || ai.equals("3208") || ai.equals("3209")) {
+        weight = value;
+        weightType = ExpandedProductParsedResult.POUND;
+        weightIncrement = ai.substring(3);
+
+      } else if (ai.equals("3920") || ai.equals("3921") || ai.equals("3922") || ai.equals("3923")) {
+        price = value;
+        priceIncrement = ai.substring(3);
+
+      } else if (ai.equals("3930") || ai.equals("3931") || ai.equals("3932") || ai.equals("3933")) {
+        if (value.length() < 4) {
+          // The value must have more of 3 symbols (3 for currency and
+          // 1 at least for the price)
+          // ExtendedProductParsedResult NOT created. Not match with RSS Expanded pattern
+          return null;
+        }
+        price = value.substring(3);
+        priceCurrency = value.substring(0, 3);
+        priceIncrement = ai.substring(3);
+
+      } else {// No match with common AIs
+        uncommonAIs.put(ai, value);
+
       }
     }
 

@@ -32,12 +32,7 @@ import com.google.zxing.multi.GenericMultipleBarcodeReader;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
+import java.io.*;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -116,18 +111,26 @@ final class DecodeWorker implements Callable<Integer> {
   }
 
   private static void writeStringToFile(String value, File file) throws IOException {
-    try (Writer out = new OutputStreamWriter(new FileOutputStream(file), UTF8)) {
+    Writer out = new OutputStreamWriter(new FileOutputStream(file), UTF8);
+    try {
       out.write(value);
+    }
+    finally {
+      out.close();
     }
   }
 
   private static void writeResultsToFile(Result[] results, File file) throws IOException {
     String newline = System.getProperty("line.separator");
-    try (Writer out = new OutputStreamWriter(new FileOutputStream(file), UTF8)) {
+    Writer out = new OutputStreamWriter(new FileOutputStream(file), UTF8);
+    try {
       for (Result result : results) {
         out.write(result.getText());
         out.write(newline);
       }
+    }
+    finally {
+      out.close();
     }
   }
 
@@ -305,12 +308,26 @@ final class DecodeWorker implements Callable<Integer> {
       resultName = resultName.substring(0, pos);
     }
     resultName += suffix;
-    try (OutputStream outStream = new FileOutputStream(resultName)) {
+    OutputStream outStream;
+    try {
+      outStream = new FileOutputStream(resultName);
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+      return;
+    }
+    try {
       if (!ImageIO.write(result, "png", outStream)) {
         System.err.println("Could not encode an image to " + resultName);
       }
     } catch (IOException ignored) {
       System.err.println("Could not write to " + resultName);
+    }
+    finally {
+      try {
+        outStream.close();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
   }
 
